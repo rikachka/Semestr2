@@ -138,7 +138,6 @@ void RenewOneDiagElement(const char& bukva1, const char& bukva2, std::vector<siz
 		new_element = std::min(diag_element, std::min(column[column_index - 1], column[column_index])) + 1;
 	diag_element = column[column_index];
 	column[column_index] = new_element;
-	//return diag_element;
 }
 
 
@@ -159,8 +158,7 @@ void ColumnOfDestinationTable(const std::string& str1, const std::string& str2, 
 		{
 			str2_index += order;
 			size_t column_index = StringLength(str2_begin, str2_index);
-			//diag_element = 
-				RenewOneDiagElement(str1[str1_index], str2[str2_index], column, column_index, diag_element);
+			RenewOneDiagElement(str1[str1_index], str2[str2_index], column, column_index, diag_element);
 		}
 		while (str2_index != str2_end);
 	}
