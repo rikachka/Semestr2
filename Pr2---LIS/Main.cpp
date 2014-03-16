@@ -1,6 +1,3 @@
-// Pr2 - LIS - 1.cpp: определяет точку входа для консольного приложения.
-//
-
 #include "stdafx.h"
 #include <vector>
 #include <iostream>
@@ -28,33 +25,60 @@ int binsearch(const int element, const std::vector<int>& vector, size_t begin, s
 	}
 }
 
-
-
 int binsearch(const int element, const std::vector<int>& vector)
 {
 	if (vector.size() == 0) return -1;
 	else return binsearch(element, vector, 0, vector.size() - 1);
 }
 
+
 void lis(const std::vector<int>& vector)
 {
 	if (vector.size() == 0)
-		return 0;
+		return;
 
-	std::vector<int> vector_lis;
+	std::vector<int> vector_value;
+	std::vector<size_t> vector_index;
+	std::vector<int> previous_index;
 
 	for (size_t index = 0; index < vector.size(); index++)
 	{
 		int element = vector[index];
-		int element_place = binsearch(element, vector_lis);
-		if (element_place < vector_lis.size())
-			vector_lis[element_place] = element;
-		else vector_lis.push_back(element);
+		int element_place = binsearch(element, vector_value);
+		// обновляем первый, который не меньше
+		if (element_place < vector_value.size())
+		{
+			vector_value[element_place] = element;
+			vector_index[element_place] = index;
+			if (element_place > 0)
+				previous_index.push_back(vector_index[element_place - 1]);
+			else previous_index.push_back(-1);
+		}
+		else 
+		{
+			vector_value.push_back(element);
+			vector_index.push_back(index);
+			if (element_place > 0)
+				previous_index.push_back(vector_index[element_place - 1]);
+			else previous_index.push_back(-1);
+		}
 	}
-	for (size_t i = 0; i < vector_lis.size(); i++)
-		std::cout << vector_lis[i] << " ";
-	std::cout << std::endl;
+
+	std::vector<int> result;
+	int index = vector_index[vector_index.size() - 1];
+	do
+	{
+		result.push_back(vector[index]);
+		index = previous_index[index];
+	}
+	while (previous_index[index] != -1);
+	result.push_back(vector[index]);
+
+	for (size_t i = 1; i <= result.size(); i++)
+		std::cout << result[result.size() - i] << " ";
 }
+
+
 
 int main()
 {
@@ -67,9 +91,10 @@ int main()
 		std::cin >> element;
 		vector.push_back(element);
 	}
-	
-	getch();
 
+	lis(vector);
+
+	getch();
 	return 0;
 }
 
