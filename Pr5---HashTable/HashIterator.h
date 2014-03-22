@@ -24,43 +24,29 @@ public:
 
 	void operator++()
 	{
-		NextIterator(vector_index, iterator);
+		if (!NextIterator(vector_index, iterator))
+			throw std::logic_error("HashIterator: ++: There is no next iterator!");
 	}
 
 	bool End()
 	{
-		try
-		{
-			size_t current_index = vector_index;
-			std::list<std::string>::iterator current_iterator = iterator;
-			NextIterator(current_index, current_iterator);
-			return false;
-		}
-		catch (const std::exception& ex) 
-		{
-			return true;
-		}
+		size_t current_index = vector_index;
+		std::list<std::string>::iterator current_iterator = iterator;
+		return !NextIterator(current_index, current_iterator);
 	}
 
 
 	void operator--()
 	{
-		PreviousIterator(vector_index, iterator);
+		if (!PreviousIterator(vector_index, iterator))
+			throw std::logic_error("HashIterator: --: There is no previous iterator!");
 	}
 
 	bool Begin()
 	{
-		try
-		{
-			size_t current_index = vector_index;
-			std::list<std::string>::iterator current_iterator = iterator;
-			PreviousIterator(current_index, current_iterator);
-			return false;
-		}
-		catch (const std::exception& ex) 
-		{
-			return true;
-		}
+		size_t current_index = vector_index;
+		std::list<std::string>::iterator current_iterator = iterator;
+		return !PreviousIterator(current_index, current_iterator);
 	}
 
 
@@ -87,7 +73,7 @@ private:
 		return true;
 	}
 
-	void NextIterator(size_t& current_index, std::list<std::string>::iterator& current_iterator)
+	bool NextIterator(size_t& current_index, std::list<std::string>::iterator& current_iterator)
 	{
 		current_iterator++;
 		if (current_iterator == vector[current_index].end()) 
@@ -95,11 +81,11 @@ private:
 			current_index++;
 			if (!NextNotEmptyList(current_index))
 			{
-				throw std::logic_error("HashIterator: ++: There is no next iterator!");
-				return;
+				return false;
 			}
 			current_iterator = vector[current_index].begin();
 		}
+		return true;
 	}
 
 
@@ -115,17 +101,18 @@ private:
 		return true;
 	}
 
-	void PreviousIterator(size_t& current_index, std::list<std::string>::iterator& current_iterator)
+	bool PreviousIterator(size_t& current_index, std::list<std::string>::iterator& current_iterator)
 	{
-		if (iterator == vector[vector_index].begin()) 
+		if (current_iterator == vector[current_index].begin()) 
 		{
-			if (!PreviousNotEmptyList(vector_index))
+			if (!PreviousNotEmptyList(current_index))
 			{
 				throw std::logic_error("HashIterator: --: There is no previous iterator!");
-				return;
+				return false;
 			}
-			iterator = vector[vector_index].end();
+			current_iterator = vector[current_index].end();
 		}
-		iterator--;
+		current_iterator--;
+		return true;
 	}
 };
