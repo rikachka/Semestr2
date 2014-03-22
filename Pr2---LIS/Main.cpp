@@ -5,7 +5,7 @@
 
 
 
-int binsearch(const int element, const std::vector<int>& vector, size_t begin, size_t end) // [begin, end]
+int binsearch(int element, const std::vector<int>& vector, size_t begin, size_t end) // [begin, end]
 {
 	size_t median = (begin + end) / 2;
 	if (vector[median] > element)
@@ -25,7 +25,7 @@ int binsearch(const int element, const std::vector<int>& vector, size_t begin, s
 	}
 }
 
-int binsearch(const int element, const std::vector<int>& vector)
+int binsearch(int element, const std::vector<int>& vector)
 {
 	if (vector.size() == 0) return -1;
 	else return binsearch(element, vector, 0, vector.size() - 1);
