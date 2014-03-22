@@ -41,7 +41,7 @@ void DecreaseTheSizeOfString(const std::string& str1, const std::string& str2,
 
 
 size_t ChangeElement(const std::string& str1, const std::string& str2, 
-	const size_t& str1_begin, const size_t& str1_end, const size_t& str2_begin, const size_t& str2_end) 
+	size_t str1_begin, size_t str1_end, size_t str2_begin, size_t str2_end) 
 {
 	if (str1[str1_begin] == str2[str2_begin]) 
 			return 0;
@@ -53,7 +53,7 @@ size_t ChangeElement(const std::string& str1, const std::string& str2,
 }
 
 size_t AddElements(const std::string& str1, const std::string& str2, 
-	const size_t& str1_begin, const size_t& str1_end, const size_t& str2_begin, const size_t& str2_end)
+	size_t str1_begin, size_t str1_end, size_t str2_begin, size_t str2_end)
 {
 	for (size_t str2_index = str2_begin; str2_index <= str2_end; str2_index++)
 		std::cout << "+ k posicii " << str1_end  << " : " << str2[str2_index] << std::endl;
@@ -61,7 +61,7 @@ size_t AddElements(const std::string& str1, const std::string& str2,
 }
 
 size_t DeleteElements(const std::string& str1, const std::string& str2, 
-	const size_t& str1_begin, const size_t& str1_end, const size_t& str2_begin, const size_t& str2_end)
+	size_t str1_begin, size_t str1_end, size_t str2_begin, size_t str2_end)
 {
 	for (size_t str1_index = str1_begin; str1_index <= str1_end; str1_index++)
 		std::cout << "- posicii " << str1_index << " : " << str1[str1_index] << std::endl;
@@ -69,7 +69,7 @@ size_t DeleteElements(const std::string& str1, const std::string& str2,
 }
 
 int CheckCriticalSituations(const std::string& str1, const std::string& str2, 
-	size_t& str1_begin, size_t& str1_end, size_t& str2_begin, size_t& str2_end)
+	size_t str1_begin, size_t str1_end, size_t str2_begin, size_t str2_end)
 {
 	if (str1_begin > str1_end && str2_begin > str2_end) return 0;
 
@@ -115,12 +115,12 @@ int CheckCriticalSituations(const std::string& str1, const std::string& str2,
 
 
 
-size_t StringLength(const size_t& str_begin, const size_t& str_end)
+size_t StringLength(size_t str_begin, size_t str_end)
 {
 	return abs(int(str_begin - str_end)) + 1;
 }
 
-void FillNullColumn(std::vector<size_t>& column, const size_t& column_size)
+void FillNullColumn(std::vector<size_t>& column, size_t column_size)
 {
 	for (size_t i = 0; i <= column_size; i++)
 	{
@@ -128,8 +128,8 @@ void FillNullColumn(std::vector<size_t>& column, const size_t& column_size)
 	}
 }
 
-void RenewOneDiagElement(const char& bukva1, const char& bukva2, std::vector<size_t>& column,
-	const size_t& column_index, size_t& diag_element)
+void RenewOneDiagElement(char bukva1, char bukva2, std::vector<size_t>& column,
+	size_t column_index, size_t& diag_element)
 {
 	size_t new_element;
 	if (bukva1 == bukva2) 
@@ -143,7 +143,7 @@ void RenewOneDiagElement(const char& bukva1, const char& bukva2, std::vector<siz
 
 
 void ColumnOfDestinationTable(const std::string& str1, const std::string& str2, std::vector<size_t>& column, 
-	const size_t& str1_begin, const size_t& str1_end, const size_t& str2_begin, const size_t& str2_end, const int& order)
+	size_t str1_begin, size_t str1_end, size_t str2_begin, size_t str2_end, int order)
 {
 	FillNullColumn(column, StringLength(str2_begin, str2_end));
 
@@ -166,13 +166,13 @@ void ColumnOfDestinationTable(const std::string& str1, const std::string& str2, 
 }
 
 void LeftColumnOfMedian(const std::string& str1, const std::string& str2, std::vector<size_t>& column, 
-	const size_t& str1_begin, const size_t& str1_end, const size_t& str2_begin, const size_t& str2_end)
+	size_t str1_begin, size_t str1_end, size_t str2_begin, size_t str2_end)
 {
 	ColumnOfDestinationTable(str1, str2, column, str1_begin, str1_end, str2_begin, str2_end, 1);
 }
 
 void RightColumnOfMedian(const std::string& str1, const std::string& str2, std::vector<size_t>& column, 
-	const size_t& str1_begin, const size_t& str1_end, const size_t& str2_begin, const size_t& str2_end)
+	size_t str1_begin, size_t str1_end, size_t str2_begin, size_t str2_end)
 {
 	ColumnOfDestinationTable(str1, str2, column, str1_end, str1_begin, str2_end, str2_begin, -1);
 }
@@ -199,7 +199,7 @@ size_t MinSummaOfTwoColumns(const std::vector<size_t>& left_column, const std::v
 
 
 size_t FindMedian(const std::string& str1, const std::string& str2, 
-	const size_t& str1_begin, const size_t& median1, const size_t& str1_end, const size_t& str2_begin, const size_t& str2_end)
+	size_t str1_begin, size_t median1, size_t str1_end, size_t str2_begin, size_t str2_end)
 {
 	
 	std::vector<size_t> left_column, right_column;
