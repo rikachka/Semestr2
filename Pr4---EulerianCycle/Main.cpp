@@ -5,6 +5,8 @@
 #include <iostream>
 #include "conio.h"
 
+
+
 class Graph
 {
 public:
@@ -98,6 +100,8 @@ private:
 	std::vector< std::pair<size_t, size_t> > edges_order_;
 	std::vector<size_t> degree_;
 };
+
+
 
 int main()
 {
