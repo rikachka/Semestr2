@@ -4,7 +4,6 @@
 #include <iostream>
 #include <algorithm>
 #include <stack>
-#include "conio.h"
 
 
 #define FIND_BRIDGES 0
