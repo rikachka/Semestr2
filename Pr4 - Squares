@@ -1,0 +1,171 @@
+/*
+Алгоритм Форда - Фалкерсона
+O(E*F) ~ O(V^3)
+F - длина слова
+*/
+
+#include "stdafx.h"
+#include <iostream>
+#include <string>
+#include <vector>
+#include <list>
+#include "conio.h"
+
+#define LETTERS_NUMBER 26
+#define SIDES_OF_SQUARE_NUMBER 3
+#define ORIGIN 0 // исток
+#define SINK LETTERS_NUMBER + number_of_squares + 1 // сток
+
+class Squares
+{
+public:
+	Squares()
+	{
+		ReadInformation();
+		MakeWord();
+	}
+
+
+
+private:
+
+	void ReadInformation()
+	{
+		std::cout << "Enter the number of squares: ";
+		std::cin >> number_of_squares;
+		edges.resize(1 + LETTERS_NUMBER + number_of_squares + 1); // исток + буквы + кубики + сток
+		for (size_t i = 1; i < LETTERS_NUMBER + 1; i++)
+		{
+			edges[i].push_back(Edge(SINK, 0, 0));
+		}
+		for (size_t i = LETTERS_NUMBER + 1; i < LETTERS_NUMBER + number_of_squares + 1; i++)
+		{
+			edges[ORIGIN].push_back(Edge(i, 1, 0));
+			std::cout << "Square " << i - LETTERS_NUMBER << ": ";
+			for (size_t j = 0; j < SIDES_OF_SQUARE_NUMBER; j++)
+			{
+				char square_side;
+				std::cin >> square_side;
+				size_t letter = square_side - 'a' + 1;
+				edges[i].push_back(Edge(letter, 1, 0, edges[letter].size())); // прямое ребро
+				edges[letter].push_back(Edge(i, 1, 1, edges[i].size() - 1)); // обратное ребро
+			}
+		}
+		std::cout << "Enter the word: ";
+		std::cin >> word;
+		for (size_t i = 0; i < word.size(); i++)
+		{
+			size_t letter = word[i] - 'a' + 1;
+			edges[letter][0].capacity++; // первым в списке лежит ребро в сток
+		}
+
+		used.resize(SINK + 1);
+	}
+
+
+
+	int Dfs(size_t edge_begin)
+	{
+		if (edge_begin == SINK)
+			return 1;
+		used[edge_begin] = GREY;
+		for (std::vector<Edge>::iterator edge = edges[edge_begin].begin(); edge != edges[edge_begin].end(); edge++)
+		{
+			if (used[edge -> end] == WHITE && edge -> flow < edge -> capacity)
+			{
+				size_t stream = Dfs(edge -> end);
+				if (stream > 0)
+				{
+					edge -> flow += stream;
+					if (edge -> end < SINK)
+						edges[edge -> end][edge -> reversal_edge].flow -= stream;
+					return stream;
+				}
+				else 
+					used[edge -> end] = BLACK;
+			}
+		}
+		return 0;
+	}
+
+
+	void Clear()
+	{
+		for (size_t i = 0; i < SINK + 1; i++)
+			if (used[i] == GREY)
+				used[i] = WHITE;
+	}
+
+	size_t MaxStream() // алгоритм Форда-Фалкерсона
+	{
+		size_t max_stream = 0;
+		for (size_t i = LETTERS_NUMBER + 1; i < SINK; i++)
+		{
+			Clear();
+			max_stream += Dfs(i);
+		}
+		return max_stream;
+	}
+
+
+	void ReconstructWord()
+	{
+		std::vector< std::list<size_t> > letters_squares;
+		letters_squares.resize(LETTERS_NUMBER + 1); // нумеруем от 1 до 26, так как уже нумеровали так
+		for (size_t i = 1; i < LETTERS_NUMBER + 1; i++)
+			for (size_t j = 1; j < edges[i].size(); j++)
+			{
+				if (edges[i][j].flow == 0)
+					letters_squares[i].push_back(edges[i][j].end - LETTERS_NUMBER);
+			}
+		std::vector< std::list<size_t>::iterator > letters_squares_iterator;
+		std::list<size_t>::iterator empty_it;
+		letters_squares_iterator.push_back(empty_it);
+		for (size_t i = 1; i < LETTERS_NUMBER + 1; i++)
+			letters_squares_iterator.push_back(letters_squares[i].begin());
+		for (size_t i = 0; i < word.size(); i++)
+		{
+			size_t letter = word[i] - 'a' + 1;
+			std::cout << *letters_squares_iterator[letter] << " ";
+			letters_squares_iterator[letter]++;
+		}
+	}
+
+
+	void MakeWord()
+	{
+		if (MaxStream() == word.size())
+		{
+			std::cout << "\nThis word can be made:\n";
+			ReconstructWord();
+		}
+		else std::cout << "\nThis word can't be made.\n";
+	}
+
+
+	struct Edge
+	{
+		Edge(size_t end, size_t capacity, size_t flow, size_t reversal_edge = 0)
+			: end(end), capacity(capacity), flow(flow), reversal_edge(reversal_edge)
+		{};
+		size_t end;
+		size_t capacity;
+		size_t flow;
+		size_t reversal_edge;
+	};
+
+	size_t number_of_squares;
+	std::string word;
+	std::vector< std::vector<Edge> > edges;
+	enum colour {WHITE, GREY, BLACK};
+	std::vector<colour> used;
+};
+
+
+int main()
+{
+	Squares();
+	getch();
+	return 0;
+}
+
