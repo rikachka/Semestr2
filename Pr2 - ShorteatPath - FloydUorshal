@@ -1,0 +1,115 @@
+
+#include "stdafx.h"
+#include <vector>
+#include <iostream>
+#include <stack>
+#include "conio.h"
+
+class CurrencyTable
+{
+public:
+	CurrencyTable()
+	{
+		std::cout << "Enter the number of currency: ";
+		std::cin >> currency_number;
+		std::cout << "Enter the table of currency:\n";
+		for (int i = 0; i < currency_number; i++)
+		{
+			std::vector<double> empty_vector;
+			currency_exchange_table.push_back(empty_vector);
+			for (int j = 0; j < currency_number; j++)
+			{
+				double element;
+				std::cin >> element;
+				currency_exchange_table[i].push_back(element);
+			}
+		}
+		for (int i = 0; i < currency_number; i++)
+		{
+			std::vector<size_t> empty_vector;
+			ancestor.push_back(empty_vector);
+			ancestor[i].resize(currency_number, i);
+		}
+	}
+
+
+	void FloydUorshalAlgorithm()
+	{
+		NoExchangeCheck();
+		int cycle_element = CreateBestExchangeTable();
+		if (cycle_element == -1)
+			std::cout << "It is not possible to do money from the air\n";
+		else
+		{
+			std::cout << "You can do money from the air:\n";
+			CycleReconstruction(cycle_element);
+		}
+	}
+		
+
+private:
+	void NoExchangeCheck()
+	{
+		for (int i = 0; i < currency_number; i++)
+		{
+			if (currency_exchange_table[i][i] < 1)
+				currency_exchange_table[i][i] = 1;
+		}
+	}
+
+
+	int CreateBestExchangeTable()
+	{
+		for (int k = 0; k < currency_number; k++)
+		{
+			for (int i = 0; i < currency_number; i++)
+			{
+				for (int j = 0; j < currency_number; j++)
+				{
+					if (currency_exchange_table[i][j] < currency_exchange_table[i][k]*currency_exchange_table[k][j])
+					{
+						currency_exchange_table[i][j] = currency_exchange_table[i][k]*currency_exchange_table[k][j];
+						ancestor[i][j] = k;
+					}
+				}
+				if (currency_exchange_table[i][i] > 1) 
+					return i;
+			}
+		}
+		return -1;
+	}
+
+
+	void WayReconstruction(size_t begin, size_t end)
+	{
+		int cur_ancestor = ancestor[begin][end];
+		if (cur_ancestor == begin)
+			std::cout << cur_ancestor + 1 << " ";
+		else
+		{
+			WayReconstruction(begin, cur_ancestor);
+			WayReconstruction(cur_ancestor, end);
+		}
+	}
+
+
+	void CycleReconstruction(size_t cycle_element)
+	{
+		WayReconstruction(cycle_element, cycle_element);
+		std::cout << cycle_element + 1 << std::endl; // WayReconstruction выводит путь без последнего элемента
+	}
+
+	size_t currency_number;
+	std::vector< std::vector <double> > currency_exchange_table;
+	std::vector< std::vector<size_t> > ancestor; //предок
+};
+
+
+int main()
+{
+	CurrencyTable currencyTable;
+	currencyTable.FloydUorshalAlgorithm();
+	getch();
+	return 0;
+}
+
