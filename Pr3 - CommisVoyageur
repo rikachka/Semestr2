@@ -1,0 +1,224 @@
+#include "stdafx.h"
+#include <vector>
+#include <ctime>
+#include <iostream>
+#include <queue>
+#include <cmath>
+#include <list>
+#include <time.h>
+#include "conio.h"
+
+
+class DSU
+{
+public:
+	DSU(size_t number_of_nodes)
+	{
+		parent_.resize(number_of_nodes, -1);
+	}
+
+	void AddEdge(size_t edge_begin, size_t edge_end)
+	{
+		if (edge_begin >= parent_.size() || edge_end >= parent_.size())
+			throw std::runtime_error("Graph.AddEdge: There is no such node here");
+		UnionSets(edge_begin, edge_end);
+	}
+
+	bool IsThereEdge(size_t edge_begin, size_t edge_end)
+	{
+		if (edge_begin >= parent_.size() || edge_end >= parent_.size())
+			throw std::runtime_error("Graph.AddEdge: There is no such node here");
+		return (FindLeader(edge_begin) == FindLeader(edge_end));
+	}
+
+private:
+	size_t FindLeader(size_t elem)
+	{
+		if (parent_[elem] == -1)
+			return elem;
+		else 
+		{
+			size_t leader = FindLeader(parent_[elem]);
+			parent_[elem] = leader;
+			return leader;
+		}
+	}
+
+	void UnionSets(size_t elem1, size_t elem2)
+	{
+		size_t leader1 = FindLeader(elem1);
+		size_t leader2 = FindLeader(elem2);
+		if (leader1 != leader2)
+		{
+			srand(time(NULL));
+			if (rand()%2)
+				parent_[leader1] = leader2;
+			else 
+				parent_[leader2] = leader1;
+		}
+	}
+
+
+	std::vector<int> parent_;
+};
+
+
+
+class CommisVoyageur
+{
+public:
+	CommisVoyageur()
+	{
+		ReadGraph();
+		MinimalSpanningTree(); // минимальное остовное дерево
+		RebuildWay();
+	}
+
+private:
+	struct Point
+	{
+		double x;
+		double y;
+	};
+
+	struct Edge
+	{
+		Edge(size_t begin, size_t end, double weight)
+			:begin(begin), end(end), weight(weight)
+		{}
+		size_t begin;
+		size_t end;
+		double weight;
+	};
+
+	struct EdgeComparator
+	{
+		bool operator() (const Edge left, const Edge right) const
+		{
+			return (left.weight > right.weight);
+		}
+	};
+
+	std::priority_queue< Edge, std::vector<Edge>, EdgeComparator > all_edges_;
+	std::vector< std::list<size_t> > spanning_tree_;
+	std::vector<Point> points_;
+	std::vector<size_t> used_;
+
+
+
+	Point BoksMullerGeneration(Point centre, size_t sigma)
+	{
+		Point point;
+		double boks_muller_x, boks_muller_y, boks_muller_s;
+		do
+		{
+			boks_muller_x = rand() % 100 / 100.0;
+			boks_muller_y = rand() % 100 / 100.0;
+			boks_muller_s = boks_muller_x*boks_muller_x + boks_muller_y*boks_muller_y;
+		}
+		while (boks_muller_s == 0 || boks_muller_s > 1);
+		point.x = centre.x + sigma * boks_muller_x * sqrt( -2*log(boks_muller_s) / boks_muller_s );
+		point.y = centre.y + sigma * boks_muller_y * sqrt( -2*log(boks_muller_s) / boks_muller_s );
+		return point;
+	}
+
+
+	double Weight(const size_t point1, const size_t point2) const
+	{
+		return sqrt(pow(points_[point1].x - points_[point2].x, 2.0) + pow(points_[point1].y - points_[point2].y, 2.0));
+	}
+
+	void AddAllEdges()
+	{
+		for (size_t i = 0; i < points_.size(); i++)
+			for (size_t j = i + 1; j < points_.size(); j++)
+				all_edges_.push(Edge(i, j, Weight(i, j)));
+	}
+
+
+	void ReadGraph()
+	{
+		size_t centres_number;
+		std::cout << "The number of centres: ";
+		std::cin >> centres_number;
+		size_t points_number;
+		std::cout << "The number of points around centres: ";
+		std::cin >> points_number;		
+		size_t sigma1;
+		std::cout << "Sigma 1: ";
+		std::cin >> sigma1;
+		size_t sigma2;
+		std::cout << "Sigma 2: ";
+		std::cin >> sigma2;
+
+		srand(time(NULL));
+		for (size_t i = 0; i < centres_number; i++) // генерация точек с нормальным распределением с помощью преобразования Бокса-Мюллера
+		{
+			Point centre = {0, 0};
+			centre = BoksMullerGeneration(centre, sigma1);
+
+			for (size_t j = 0; j < points_number; j++)
+			{
+				points_.push_back(BoksMullerGeneration(centre, sigma2));
+			}
+		}
+
+		AddAllEdges();
+		spanning_tree_.resize(points_.size());
+	}
+
+
+
+	void AddEdgeInSpanningTree(Edge edge)
+	{
+		spanning_tree_[edge.begin].push_back(edge.end);
+		spanning_tree_[edge.end].push_back(edge.begin);
+	}
+
+	void MinimalSpanningTree()
+	{
+		DSU spanning_tree_in_dsu(points_.size());
+		while(!all_edges_.empty())
+		{
+			Edge edge = all_edges_.top();
+			all_edges_.pop();
+			if (!spanning_tree_in_dsu.IsThereEdge(edge.begin, edge.end))
+			{
+				spanning_tree_in_dsu.AddEdge(edge.begin, edge.end);
+				AddEdgeInSpanningTree(edge);
+			}
+		}
+	}
+
+
+
+
+	void DFS(size_t node)
+	{
+		std::cout << node << " ";
+		used_[node] = true;
+		for (std::list<size_t>::iterator it = spanning_tree_[node].begin(); it != spanning_tree_[node].end(); it++)
+		{
+			size_t child = *it;
+			if (!used_[child]) 
+				DFS(child);
+		}
+	}
+
+	void RebuildWay()
+	{
+		used_.resize(points_.size(), false);
+		DFS(0);
+		std::cout << std::endl;
+	}
+
+};
+
+
+int main()
+{
+	CommisVoyageur();
+	getch();
+	return 0;
+}
+
