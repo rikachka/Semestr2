@@ -1,0 +1,123 @@
+
+#include "stdafx.h"
+#include <vector>
+#include <iostream>
+#include <stack>
+#include "conio.h"
+
+class CurrencyTable
+{
+public:
+	CurrencyTable()
+	{
+		std::cout << "Enter the number of currency:";
+		std::cin >> currency_number;
+		std::cout << "Enter the table of currency:\n";
+		for (int i = 0; i < currency_number; i++)
+		{
+			std::vector<double> empty_vector;
+			table.push_back(empty_vector);
+			for (int j = 0; j < currency_number; j++)
+			{
+				double element;
+				std::cin >> element;
+				table[i].push_back(element);
+			}
+		}
+	}
+
+
+	void FordBellmanAlgorithm()
+	{
+		Initialization();
+		int change;
+		for (int i = 0; i <= currency_number; i++)
+		{
+			change = Renew();
+			if (change == -1)
+			{
+				std::cout << "It is not possible to do money from the air\n";
+				return;
+			}
+		}
+		std::cout << "You can do money from the air\n";
+		CycleReconstruction(change);
+	}
+		
+
+
+private:
+	void Initialization()
+	{
+		currency_exchange.resize(currency_number, 1);
+		for (int i = 0; i < currency_number; i++)
+			parent.push_back(i);
+	}
+
+
+	int Renew()
+	{
+		int change = -1;
+		for (int i = 0; i < currency_number; i++)
+		{
+			for (int j = 0; j < currency_number; j++)
+			{
+				if (currency_exchange[j] < currency_exchange[i]*table[i][j])
+				{
+					currency_exchange[j] = currency_exchange[i]*table[i][j];
+					parent[j] = i;
+					change = j;
+				}
+			}
+		}
+		return change;
+	}
+
+
+	void CycleReconstruction(size_t last_change)
+	{
+		std::stack<size_t> cycle;
+		std::vector<bool> colour;
+		colour.resize(currency_number, 0);
+		
+		size_t change = last_change;
+		size_t cycle_begin;
+		while (true)
+		{
+			if (colour[change] == 1)
+			{
+				cycle_begin = change;
+				break;
+			}
+			colour[change] = 1;
+			cycle.push(change);
+			change = parent[change];
+		}
+
+		std::cout << cycle_begin + 1 << " ";
+		while (cycle.top() != cycle_begin)
+		{
+			std::cout << cycle.top() + 1 << " ";
+			cycle.pop();
+		}
+		std::cout << cycle.top();
+		std::cout << std::endl;
+	}
+
+
+
+	size_t currency_number;
+	std::vector< std::vector <double> > table;
+	std::vector<double> currency_exchange;
+	std::vector<size_t> parent;
+};
+
+
+int main()
+{
+	CurrencyTable currencyTable;
+	currencyTable.FordBellmanAlgorithm();
+	getch();
+	return 0;
+}
+
