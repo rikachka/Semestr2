@@ -1,0 +1,167 @@
+#include "stdafx.h"
+#include <string>
+#include <iostream>
+#include <queue>
+#include <vector>
+#include <list>
+#include <stdlib.h> // abs()
+#include "conio.h"
+#include <fstream>
+
+
+class EditorDistance
+{
+private:
+	struct IndexPair
+	{
+		IndexPair(size_t i, size_t j, size_t dest)
+			: i(i), j(j), dest(dest)
+		{};
+		size_t i; // индекс в str1
+		size_t j; // индекс в str2
+		size_t dest; // destination между [0, i] в str1 и [0, j] в str2
+	};
+
+	struct DestinationComparator
+	{
+		bool operator() (const IndexPair left, const IndexPair right) const
+		{
+			return (left.dest > right.dest);
+		}
+	};
+
+	std::string str1_, str2_;
+	std::priority_queue< IndexPair, std::vector<IndexPair>, DestinationComparator > heap_; // все пары (i, j), расстояние до которых может оказаться минимальным
+	std::vector< std::list<size_t> > used_; // used_[i] хранит j, до которых уже найдено минимальное расстояние 
+
+
+
+public:
+	explicit EditorDistance(const std::string& str1, const std::string& str2)
+	{
+		str1_ = AddFirstUnimportantSymbol(str1);
+		str2_ = AddFirstUnimportantSymbol(str2);
+
+		used_.resize(str1_.size());
+
+		AddElements(IndexPair(0, 0, 0));
+
+		while (true)
+		{
+			int destination = NextIteration();
+			if (destination >= 0)
+			{
+				destination -= abs(int(str1_.size() - str2_.size())); // корректируем расстояние на величину потенциала
+				std::cout << "Editor's destination = " << destination << std::endl;
+				return;
+			}
+		}
+	}
+
+
+
+private:
+	std::string AddFirstUnimportantSymbol(const std::string& str)
+	{
+		std::string str_ = " ";
+		str_.append(str);
+		return str_;
+	}
+
+
+	bool Used(const IndexPair& index_pair) 
+	{
+		for(std::list<size_t>::iterator it = used_[index_pair.i].begin(); it != used_[index_pair.i].end(); it++)
+			if (*it == index_pair.j)
+				return true;
+		return false;
+	}
+
+
+	void AddElements(const IndexPair& index_pair)
+	{
+		if (index_pair.j + 1 != str2_.size())
+		{
+			if (index_pair.i <= index_pair.j)
+				heap_.push(IndexPair(index_pair.i, index_pair.j + 1, index_pair.dest + 2));
+			else if (index_pair.i > index_pair.j)
+				heap_.push(IndexPair(index_pair.i, index_pair.j + 1, index_pair.dest));
+		}
+
+		if (index_pair.i + 1 != str1_.size())
+		{
+			if (index_pair.i < index_pair.j)
+				heap_.push(IndexPair(index_pair.i + 1, index_pair.j, index_pair.dest));
+			else if (index_pair.i >= index_pair.j)
+				heap_.push(IndexPair(index_pair.i + 1, index_pair.j, index_pair.dest + 2));
+		}
+
+		if (index_pair.j + 1 != str2_.size() && index_pair.i + 1 != str1_.size())
+		{
+			if (str1_[index_pair.i + 1] == str2_[index_pair.j + 1]) 
+				heap_.push(IndexPair(index_pair.i + 1, index_pair.j + 1, index_pair.dest));
+			else heap_.push(IndexPair(index_pair.i + 1, index_pair.j + 1, index_pair.dest + 1));
+		}
+	}
+
+
+	void MarkIndexPair(const IndexPair& index_pair)
+	{
+		used_[index_pair.i].push_front(index_pair.j);
+	}
+
+
+	int NextIteration()
+	{
+		IndexPair index_pair = heap_.top();
+		while (Used(index_pair))
+		{
+			heap_.pop();
+			index_pair = heap_.top();
+		}
+		AddElements(index_pair);
+		MarkIndexPair(index_pair);
+		if (index_pair.j + 1 == str2_.size() && index_pair.i + 1 == str1_.size())
+			return index_pair.dest;
+		else return -1;
+	}
+};
+
+
+
+//искомое расстояние - 10
+void TestText()
+{
+	std::ifstream f_text1("text1.txt");
+	std::ifstream f_text2("text2.txt");
+	std::string str1, str2, temp_str;
+	if (!f_text1) 
+		throw std::logic_error("File 'Text1' does not exsist");
+	if (!f_text2) 
+		throw std::logic_error("File 'Text2' does not exsist");
+	while (!f_text1.eof())
+	{
+		std::getline(f_text1, temp_str);
+		str1.append(temp_str);
+		str1.push_back('\n');
+	}
+	f_text1.close();
+	while (!f_text2.eof())
+	{
+		std::getline(f_text2, temp_str);
+		str2.append(temp_str);
+		str2.push_back('\n');
+	}
+	f_text2.close();
+	EditorDistance(str1, str2);
+}
+
+
+
+int main()
+{
+	TestText();
+	getch();
+	return 0;
+}
+
